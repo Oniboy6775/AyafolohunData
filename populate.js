@@ -14,20 +14,20 @@ const {
   NMOBILE,
   MTN_SME2,
   MTN_CG,
-  MTN_COUPON,
-  MTN_DIRECT,
+  // MTN_COUPON,
+  // MTN_DIRECT,
 } = require("./API_DATA/newData");
 require("dotenv").config();
 const costPrices = [
   { network: "MTN", costPrice: 300 },
   { network: "MTN-CG", costPrice: 300 },
-  { network: "MTN-COUPON", costPrice: 300 },
-  { network: "MTN-DIRECT", costPrice: 300 },
   { network: "MTN-SME2", costPrice: 300 },
   { network: "GLO", costPrice: 300 },
   { network: "AIRTEL", costPrice: 300 },
   { network: "9MOBILE", costPrice: 300 },
-  { network: "MTN-COUPON", costPrice: 300 },
+  // { network: "MTN-COUPON", costPrice: 300 },
+  // { network: "MTN-DIRECT", costPrice: 300 },
+  // { network: "MTN-COUPON", costPrice: 300 },
 ];
 const populate = async () => {
   try {
@@ -38,12 +38,12 @@ const populate = async () => {
     await dataModel.create(MTN_SME);
     await dataModel.create(MTN_SME2);
     await dataModel.create(MTN_CG);
-    await dataModel.create(MTN_COUPON);
-    await dataModel.create(MTN_DIRECT);
     await dataModel.create(AIRTEL);
     await dataModel.create(GLO);
     await dataModel.create(NMOBILE);
     await costPriceModel.create(costPrices);
+    // await dataModel.create(MTN_COUPON);
+    // await dataModel.create(MTN_DIRECT);
     await dataModel.updateMany(
       { plan: "500MB" },
       { $set: { volumeRatio: 0.5 } }
