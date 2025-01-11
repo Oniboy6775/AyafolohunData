@@ -83,16 +83,20 @@ const billStack = async (req, res) => {
   res.sendStatus(200);
   // console.log(req.body);
   // console.log(req.headers);
+  console.log(req.body);
   const signature = req.headers["x-wiaxy-signature"];
   const secret = process.env.BILLSTACK_SECRET;
   // write MD5 of a secret key above
+  console.log("PASS STAGE 1");
   const expectedSignature = md5(secret);
   if (signature !== expectedSignature) {
     console.log({ signature, secret });
     console.log("SIGNATURE NOT CORRECT");
     return;
   }
+  console.log("PASS STAGE 2");
   if (req.body.data.type == "RESERVED_ACCOUNT_TRANSACTION") {
+    console.log("PASS STAGE 3");
     const {
       merchant_reference,
       transaction_ref,
@@ -100,11 +104,13 @@ const billStack = async (req, res) => {
       account: { account_number, bank_name },
     } = req.body.data;
     const customerEmail = merchant_reference.split("_")[1];
+    console.log("PASS STAGE 4");
     console.log({ customerEmail });
     let charges = parseFloat(amount) * 0.005;
     if (charges > 50) charges = 50;
     const settlementAmount = (amount - charges).toFixed(2);
     const user = await User.findOne({ email: customerEmail });
+    console.log("PASS STAGE 5");
     await generateReceipt({
       transactionId: transaction_ref,
       planNetwork: `Auto-funding||${bank_name}`,
@@ -120,10 +126,12 @@ const billStack = async (req, res) => {
       increased: true,
       // wavedAmount: settlementAmount - amountToCredit,
     });
+    console.log("PASS STAGE 6");
     await User.updateOne(
       { email: customerEmail },
       { $inc: { balance: settlementAmount } }
     );
+    console.log("PASS STAGE 7");
   }
 };
 module.exports = { dataReloadedWebhook, billStack };
