@@ -83,59 +83,63 @@ const billStack = async (req, res) => {
   res.sendStatus(200);
   // console.log(req.body);
   // console.log(req.headers);
-  console.log("PASS STAGE 0");
-  console.log(req.body);
-  console.log("PASS STAGE 0");
-  const signature = req.headers["x-wiaxy-signature"];
-  console.log("PASS STAGE 01");
-  const secret = process.env.BILLSTACK_SECRET;
-  console.log("PASS STAGE 011");
-  // write MD5 of a secret key above
-  console.log("PASS STAGE 1");
-  const expectedSignature = md5(secret);
-  if (signature !== expectedSignature) {
-    console.log({ signature, secret });
-    console.log("SIGNATURE NOT CORRECT");
-    return;
-  }
-  console.log("PASS STAGE 2");
-  if (req.body.data.type == "RESERVED_ACCOUNT_TRANSACTION") {
-    console.log("PASS STAGE 3");
-    const {
-      merchant_reference,
-      transaction_ref,
-      amount,
-      account: { account_number, bank_name },
-    } = req.body.data;
-    const customerEmail = merchant_reference.split("_")[1];
-    console.log("PASS STAGE 4");
-    console.log({ customerEmail });
-    let charges = parseFloat(amount) * 0.005;
-    if (charges > 50) charges = 50;
-    const settlementAmount = (amount - charges).toFixed(2);
-    const user = await User.findOne({ email: customerEmail });
-    console.log("PASS STAGE 5");
-    await generateReceipt({
-      transactionId: transaction_ref,
-      planNetwork: `Auto-funding||${bank_name}`,
-      status: "success",
-      planName: `₦${amount}`,
-      phoneNumber: account_number,
-      response: `A payment of ₦${amount} received from ${bank_name} ${account_number}. ₦${settlementAmount} has been credited and ₦${charges} bank charges has been deducted`,
-      amountToCharge: Number(settlementAmount),
-      balance: user.balance,
-      userId: user._id,
-      userName: user.userName,
-      type: "wallet",
-      increased: true,
-      // wavedAmount: settlementAmount - amountToCredit,
-    });
-    console.log("PASS STAGE 6");
-    await User.updateOne(
-      { email: customerEmail },
-      { $inc: { balance: settlementAmount } }
-    );
-    console.log("PASS STAGE 7");
+  try {
+    console.log("PASS STAGE 0");
+    console.log(req.body);
+    console.log("PASS STAGE 0");
+    const signature = req.headers["x-wiaxy-signature"];
+    console.log("PASS STAGE 01");
+    const secret = process.env.BILLSTACK_SECRET;
+    console.log("PASS STAGE 011");
+    // write MD5 of a secret key above
+    console.log("PASS STAGE 1");
+    const expectedSignature = md5(secret);
+    if (signature !== expectedSignature) {
+      console.log({ signature, secret });
+      console.log("SIGNATURE NOT CORRECT");
+      return;
+    }
+    console.log("PASS STAGE 2");
+    if (req.body.data.type == "RESERVED_ACCOUNT_TRANSACTION") {
+      console.log("PASS STAGE 3");
+      const {
+        merchant_reference,
+        transaction_ref,
+        amount,
+        account: { account_number, bank_name },
+      } = req.body.data;
+      const customerEmail = merchant_reference.split("_")[1];
+      console.log("PASS STAGE 4");
+      console.log({ customerEmail });
+      let charges = parseFloat(amount) * 0.005;
+      if (charges > 50) charges = 50;
+      const settlementAmount = (amount - charges).toFixed(2);
+      const user = await User.findOne({ email: customerEmail });
+      console.log("PASS STAGE 5");
+      await generateReceipt({
+        transactionId: transaction_ref,
+        planNetwork: `Auto-funding||${bank_name}`,
+        status: "success",
+        planName: `₦${amount}`,
+        phoneNumber: account_number,
+        response: `A payment of ₦${amount} received from ${bank_name} ${account_number}. ₦${settlementAmount} has been credited and ₦${charges} bank charges has been deducted`,
+        amountToCharge: Number(settlementAmount),
+        balance: user.balance,
+        userId: user._id,
+        userName: user.userName,
+        type: "wallet",
+        increased: true,
+        // wavedAmount: settlementAmount - amountToCredit,
+      });
+      console.log("PASS STAGE 6");
+      await User.updateOne(
+        { email: customerEmail },
+        { $inc: { balance: settlementAmount } }
+      );
+      console.log("PASS STAGE 7");
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 module.exports = { dataReloadedWebhook, billStack };
