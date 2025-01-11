@@ -83,9 +83,13 @@ const billStack = async (req, res) => {
   res.sendStatus(200);
   // console.log(req.body);
   // console.log(req.headers);
+  console.log("PASS STAGE 0");
   console.log(req.body);
+  console.log("PASS STAGE 0");
   const signature = req.headers["x-wiaxy-signature"];
+  console.log("PASS STAGE 01");
   const secret = process.env.BILLSTACK_SECRET;
+  console.log("PASS STAGE 011");
   // write MD5 of a secret key above
   console.log("PASS STAGE 1");
   const expectedSignature = md5(secret);
